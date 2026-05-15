@@ -1,0 +1,1475 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>PRODE Atlas Cines Mundial 2026</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#003087">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="PRODE 2026">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+  <style>
+    :root {
+      --blue: #003087;
+      --blue-mid: #004aad;
+      --cyan: #00B4D8;
+      --cyan-light: #caf0f8;
+      --white: #ffffff;
+      --bg: #f0f4f8;
+      --card: #ffffff;
+      --border: #dde3ea;
+      --text: #1a2640;
+      --text-secondary: #5a6a80;
+      --red: #e53935;
+      --green: #2e7d32;
+      --green-light: #e8f5e9;
+      --orange: #e65100;
+      --header-h: 56px;
+      --nav-h: 64px;
+      --radius: 12px;
+      --shadow: 0 2px 8px rgba(0,48,135,0.10);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+    }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; }
+    input { font-family: inherit; }
+    img { max-width: 100%; }
+
+    /* ─── Utilities ─── */
+    .hidden { display: none !important; }
+
+    .spinner {
+      width: 28px; height: 28px;
+      border: 3px solid rgba(0,180,216,.3);
+      border-top-color: var(--cyan);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 32px auto;
+    }
+    .spinner-lg {
+      width: 48px; height: 48px;
+      border-width: 4px;
+      border-color: rgba(255,255,255,.3);
+      border-top-color: var(--white);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed; bottom: calc(var(--nav-h) + 12px); left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1a2640; color: #fff;
+      padding: 10px 20px; border-radius: 24px;
+      font-size: 14px; opacity: 0;
+      transition: opacity .25s, transform .25s;
+      z-index: 1000; pointer-events: none;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    .error-msg {
+      background: #fde8e8; color: var(--red);
+      border: 1px solid #f5c6c6; border-radius: 8px;
+      padding: 10px 14px; font-size: 13px; margin-bottom: 12px;
+    }
+    .success-msg {
+      background: var(--green-light); color: var(--green);
+      border: 1px solid #c8e6c9; border-radius: 8px;
+      padding: 10px 14px; font-size: 13px; margin-bottom: 12px;
+    }
+
+    /* ─── Loading Screen ─── */
+    #loading-screen {
+      position: fixed; inset: 0;
+      background: var(--blue);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 20px; z-index: 9999;
+    }
+    #loading-screen img { width: 120px; opacity: .9; }
+    #loading-screen p { color: rgba(255,255,255,.7); font-size: 14px; }
+
+    /* ─── Auth Screen ─── */
+    #auth-screen {
+      min-height: 100vh;
+      background: linear-gradient(160deg, var(--blue) 0%, var(--blue-mid) 60%, #006d8f 100%);
+      display: flex; align-items: flex-start; justify-content: center;
+      padding: 24px 16px 40px;
+      overflow-y: auto;
+    }
+    .auth-wrap { width: 100%; max-width: 420px; }
+    .auth-logo {
+      text-align: center; padding: 32px 0 24px;
+    }
+    .auth-logo img { width: 90px; height: 90px; object-fit: contain; border-radius: 16px; }
+    .auth-logo h1 {
+      color: #fff; font-size: 20px; font-weight: 700;
+      margin-top: 12px; letter-spacing: -.3px;
+    }
+    .auth-logo p { color: rgba(255,255,255,.65); font-size: 13px; margin-top: 4px; }
+    .auth-card {
+      background: #fff; border-radius: 20px;
+      padding: 28px 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.25);
+    }
+    .auth-card h2 { font-size: 20px; font-weight: 700; color: var(--blue); margin-bottom: 20px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label {
+      display: block; font-size: 13px; font-weight: 600;
+      color: var(--text-secondary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .4px;
+    }
+    .form-group input {
+      width: 100%; padding: 12px 14px;
+      border: 1.5px solid var(--border); border-radius: 10px;
+      font-size: 15px; color: var(--text);
+      transition: border-color .2s;
+      outline: none;
+      background: #fafbfd;
+    }
+    .form-group input:focus { border-color: var(--cyan); background: #fff; }
+    .form-hint { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5; }
+
+    .btn-primary {
+      width: 100%; padding: 14px;
+      background: var(--blue); color: #fff;
+      border-radius: 12px; font-size: 16px; font-weight: 700;
+      letter-spacing: .2px; margin-top: 6px;
+      transition: background .2s, transform .1s;
+    }
+    .btn-primary:active { transform: scale(.98); background: var(--blue-mid); }
+    .btn-primary:disabled { opacity: .6; cursor: not-allowed; }
+
+    .auth-links { margin-top: 16px; display: flex; flex-direction: column; gap: 6px; align-items: center; }
+    .btn-link {
+      color: var(--cyan); font-size: 14px; font-weight: 500;
+      text-decoration: underline; background: none; border: none;
+      padding: 4px 0;
+    }
+    .btn-link:hover { color: var(--blue); }
+
+    /* ─── App Layout ─── */
+    #app-screen { height: 100vh; display: flex; flex-direction: column; }
+
+    .app-header {
+      height: var(--header-h);
+      background: var(--blue);
+      display: flex; align-items: center;
+      padding: 0 16px;
+      gap: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.2);
+      flex-shrink: 0;
+      z-index: 100;
+    }
+    .header-logo { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
+    .header-logo img { width: 34px; height: 34px; object-fit: contain; border-radius: 6px; flex-shrink: 0; }
+    .header-logo span { color: #fff; font-weight: 700; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    #header-username { color: rgba(255,255,255,.85); font-size: 13px; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .btn-icon {
+      width: 36px; height: 36px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,.85); font-size: 18px;
+      transition: background .2s;
+    }
+    .btn-icon:hover { background: rgba(255,255,255,.15); }
+
+    .tab-content {
+      flex: 1; overflow-y: auto;
+      padding-bottom: 8px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tab-pane { padding: 16px; }
+
+    /* ─── Bottom Nav ─── */
+    .bottom-nav {
+      height: var(--nav-h);
+      background: #fff;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-shrink: 0;
+      z-index: 100;
+    }
+    .nav-btn {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 3px; color: var(--text-secondary);
+      font-size: 11px; font-weight: 500;
+      transition: color .2s;
+      position: relative;
+    }
+    .nav-btn .nav-icon { font-size: 22px; line-height: 1; }
+    .nav-btn.active { color: var(--blue); }
+    .nav-btn.active::before {
+      content: '';
+      position: absolute; top: 0; left: 20%; right: 20%;
+      height: 3px; background: var(--blue); border-radius: 0 0 4px 4px;
+    }
+
+    /* ─── Section Headers ─── */
+    .section-header {
+      background: var(--blue);
+      color: #fff; font-size: 13px; font-weight: 700;
+      padding: 8px 14px; border-radius: 8px;
+      margin-bottom: 10px; margin-top: 16px;
+      text-transform: uppercase; letter-spacing: .5px;
+    }
+    .section-header:first-child { margin-top: 0; }
+    .group-header {
+      color: var(--text-secondary); font-size: 12px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: .6px;
+      padding: 10px 2px 6px; border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+
+    /* ─── Match Card ─── */
+    .match-card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      margin-bottom: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .match-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 14px 0;
+      font-size: 12px; color: var(--text-secondary);
+    }
+    .match-venue { font-size: 11px; color: var(--text-secondary); }
+    .match-lock-badge {
+      background: #fff3e0; color: #e65100;
+      border-radius: 20px; padding: 2px 8px;
+      font-size: 11px; font-weight: 600;
+    }
+    .match-teams {
+      display: flex; align-items: center;
+      padding: 12px 14px 8px;
+      gap: 8px;
+    }
+    .match-team {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; gap: 4px; text-align: center;
+    }
+    .team-flag { font-size: 28px; line-height: 1; }
+    .team-name { font-size: 12px; font-weight: 600; color: var(--text); line-height: 1.2; }
+    .match-score-display {
+      display: flex; flex-direction: column; align-items: center;
+      gap: 2px; min-width: 64px;
+    }
+    .score-result {
+      font-size: 22px; font-weight: 800; color: var(--blue);
+      letter-spacing: 2px; line-height: 1;
+    }
+    .score-result.has-result { color: var(--blue); }
+    .vs-text { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+
+    /* ─── Prediction Form (unlocked) ─── */
+    .prediction-form { padding: 0 14px 14px; }
+    .result-opts {
+      display: flex; gap: 8px; margin-bottom: 10px;
+    }
+    .result-opt {
+      flex: 1; position: relative;
+    }
+    .result-opt input[type=radio] { position: absolute; opacity: 0; width: 0; }
+    .result-opt label {
+      display: flex; align-items: center; justify-content: center;
+      height: 40px; border: 2px solid var(--border);
+      border-radius: 8px; font-size: 16px; font-weight: 700;
+      color: var(--text-secondary); cursor: pointer;
+      transition: all .15s; background: #fafbfd;
+    }
+    .result-opt input[type=radio]:checked + label {
+      border-color: var(--blue); background: var(--blue);
+      color: #fff;
+    }
+    .score-row {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 10px;
+    }
+    .score-row label { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+    .score-input {
+      width: 52px; height: 38px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      text-align: center; font-size: 18px; font-weight: 700;
+      color: var(--text); outline: none;
+      transition: border-color .2s;
+    }
+    .score-input:focus { border-color: var(--cyan); }
+    .score-sep { font-size: 20px; font-weight: 700; color: var(--text-secondary); }
+    .btn-save {
+      width: 100%; padding: 10px;
+      background: var(--cyan); color: #fff;
+      border-radius: 8px; font-size: 14px; font-weight: 700;
+      transition: background .2s;
+    }
+    .btn-save:active { background: #0090b0; }
+    .btn-save:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* ─── Prediction Display (locked) ─── */
+    .prediction-display {
+      margin: 0 14px 12px;
+      background: #f8fafc; border-radius: 8px;
+      padding: 10px 12px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .pred-label { font-size: 12px; color: var(--text-secondary); }
+    .pred-value { font-size: 14px; font-weight: 700; color: var(--text); }
+    .pred-no { font-size: 13px; color: var(--text-secondary); font-style: italic; }
+    .pts-badge {
+      font-size: 13px; font-weight: 800;
+      padding: 4px 10px; border-radius: 20px;
+    }
+    .pts-badge.pts-5 { background: #e8f5e9; color: #1b5e20; }
+    .pts-badge.pts-3 { background: #e3f2fd; color: #0d47a1; }
+    .pts-badge.pts-0 { background: #fce4ec; color: #880e4f; }
+    .pts-badge.pts-pending { background: #f3f3f3; color: #888; }
+
+    /* ─── Mi Prode ─── */
+    .prode-summary {
+      background: var(--blue);
+      border-radius: var(--radius); padding: 20px;
+      color: #fff; margin-bottom: 16px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .prode-summary h3 { font-size: 14px; opacity: .8; font-weight: 500; }
+    .prode-total-pts { font-size: 40px; font-weight: 800; }
+    .prode-stats { display: flex; gap: 20px; margin-top: 8px; }
+    .prode-stat { text-align: center; }
+    .prode-stat .n { font-size: 22px; font-weight: 700; }
+    .prode-stat .l { font-size: 11px; opacity: .75; }
+
+    /* ─── Ranking ─── */
+    .ranking-table { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+    .ranking-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+    }
+    .ranking-row:last-child { border-bottom: none; }
+    .ranking-row.me { background: #e8f4fd; }
+    .rank-pos {
+      width: 28px; text-align: center;
+      font-size: 14px; font-weight: 800; color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+    .rank-pos.gold { color: #f9a825; }
+    .rank-pos.silver { color: #78909c; }
+    .rank-pos.bronze { color: #8d6e63; }
+    .rank-avatar {
+      width: 36px; height: 36px; border-radius: 50%;
+      background: var(--blue); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 700; flex-shrink: 0;
+    }
+    .rank-name { flex: 1; font-size: 14px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rank-pts { font-size: 18px; font-weight: 800; color: var(--blue); flex-shrink: 0; }
+    .rank-pts-label { font-size: 11px; color: var(--text-secondary); text-align: right; }
+
+    /* ─── Admin ─── */
+    .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .admin-header h2 { font-size: 18px; font-weight: 700; }
+    .btn-add {
+      background: var(--cyan); color: #fff;
+      padding: 9px 16px; border-radius: 10px;
+      font-size: 14px; font-weight: 700;
+    }
+    .admin-match-card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); padding: 14px;
+      margin-bottom: 10px; border: 1px solid var(--border);
+    }
+    .admin-match-top {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .admin-match-teams { font-size: 15px; font-weight: 700; }
+    .admin-match-meta { font-size: 12px; color: var(--text-secondary); margin-bottom: 10px; }
+    .admin-match-result {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--green-light); color: var(--green);
+      border-radius: 6px; padding: 3px 10px;
+      font-size: 13px; font-weight: 700; margin-bottom: 8px;
+    }
+    .admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .btn-sm {
+      padding: 7px 12px; border-radius: 8px;
+      font-size: 13px; font-weight: 600;
+    }
+    .btn-edit { background: #e3f2fd; color: #0d47a1; }
+    .btn-result { background: #e8f5e9; color: #1b5e20; }
+    .btn-recalc { background: #fff3e0; color: #e65100; }
+    .btn-delete { background: #fce4ec; color: #c62828; }
+
+    /* ─── Modal ─── */
+    .modal-overlay {
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.5);
+      display: flex; align-items: flex-end; justify-content: center;
+      z-index: 500;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    .modal {
+      background: #fff; width: 100%; max-width: 480px;
+      border-radius: 20px 20px 0 0;
+      padding: 0; max-height: 90vh;
+      display: flex; flex-direction: column;
+      animation: slideUp .2s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .modal-header h3 { font-size: 17px; font-weight: 700; }
+    .modal-body { padding: 20px; overflow-y: auto; flex: 1; }
+    .modal-footer {
+      padding: 12px 20px; border-top: 1px solid var(--border);
+      display: flex; gap: 10px; flex-shrink: 0;
+    }
+    .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; background: var(--bg); color: var(--text); font-size: 15px; font-weight: 600; }
+    .btn-confirm { flex: 2; padding: 12px; border-radius: 10px; background: var(--blue); color: #fff; font-size: 15px; font-weight: 700; }
+
+    .modal-form .form-group { margin-bottom: 14px; }
+    .modal-form label { display: block; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .4px; color: var(--text-secondary); margin-bottom: 5px; }
+    .modal-form input, .modal-form select {
+      width: 100%; padding: 11px 12px;
+      border: 1.5px solid var(--border); border-radius: 8px;
+      font-size: 15px; color: var(--text); outline: none; background: #fafbfd;
+    }
+    .modal-form input:focus, .modal-form select:focus { border-color: var(--cyan); background: #fff; }
+    .form-row { display: flex; gap: 10px; }
+    .form-row .form-group { flex: 1; }
+
+    .empty-state { text-align: center; padding: 48px 16px; color: var(--text-secondary); }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 15px; }
+
+    @media (min-width: 480px) {
+      .tab-pane { padding: 20px; max-width: 600px; margin: 0 auto; }
+      .modal { border-radius: 20px; margin-bottom: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loading -->
+<div id="loading-screen">
+  <img src="logo.png" alt="Atlas Cines" onerror="this.style.display='none'">
+  <div class="spinner spinner-lg"></div>
+  <p>Cargando...</p>
+</div>
+
+<!-- Auth -->
+<div id="auth-screen" class="hidden">
+  <div class="auth-wrap">
+    <div class="auth-logo">
+      <img src="logo.png" alt="Atlas Cines" onerror="this.style.display='none'">
+      <h1>PRODE Atlas Cines</h1>
+      <p>Mundial 2026</p>
+    </div>
+
+    <!-- Login -->
+    <div id="form-login" class="auth-card">
+      <h2>Iniciar Sesión</h2>
+      <div id="login-error" class="error-msg hidden"></div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="tu@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
+      </div>
+      <button id="btn-login" class="btn-primary">Ingresar</button>
+      <div class="auth-links">
+        <button data-auth="forgot" class="btn-link">¿Olvidaste tu contraseña?</button>
+        <button data-auth="register" class="btn-link">¿No tenés cuenta? Registrate</button>
+      </div>
+    </div>
+
+    <!-- Register -->
+    <div id="form-register" class="auth-card hidden">
+      <h2>Crear Cuenta</h2>
+      <div id="register-error" class="error-msg hidden"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre</label>
+          <input type="text" id="reg-first" placeholder="Juan" autocomplete="given-name">
+        </div>
+        <div class="form-group">
+          <label>Apellido</label>
+          <input type="text" id="reg-last" placeholder="García" autocomplete="family-name">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="tu@email.com" autocomplete="email">
+      </div>
+      <div class="form-group">
+        <label>Contraseña</label>
+        <input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label>Confirmar Contraseña</label>
+        <input type="password" id="reg-confirm" placeholder="Repetí la contraseña" autocomplete="new-password">
+      </div>
+      <button id="btn-register" class="btn-primary">Crear Cuenta</button>
+      <div class="auth-links">
+        <button data-auth="login" class="btn-link">¿Ya tenés cuenta? Iniciá sesión</button>
+      </div>
+    </div>
+
+    <!-- Forgot -->
+    <div id="form-forgot" class="auth-card hidden">
+      <h2>Recuperar Contraseña</h2>
+      <p class="form-hint">Ingresá tu email y te enviaremos un link para restablecer tu contraseña.</p>
+      <div id="forgot-error" class="error-msg hidden"></div>
+      <div id="forgot-success" class="success-msg hidden"></div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="forgot-email" placeholder="tu@email.com" autocomplete="email">
+      </div>
+      <button id="btn-forgot" class="btn-primary">Enviar Link</button>
+      <div class="auth-links">
+        <button data-auth="login" class="btn-link">Volver al inicio de sesión</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app-screen" class="hidden">
+  <header class="app-header">
+    <div class="header-logo">
+      <img src="logo.png" alt="Atlas Cines" onerror="this.style.display='none'">
+      <span>PRODE 2026</span>
+    </div>
+    <div class="header-right">
+      <span id="header-username"></span>
+      <button id="btn-logout" class="btn-icon" title="Cerrar sesión">⏻</button>
+    </div>
+  </header>
+
+  <main class="tab-content">
+    <div id="tab-fixture" class="tab-pane"></div>
+    <div id="tab-prode" class="tab-pane hidden"></div>
+    <div id="tab-ranking" class="tab-pane hidden"></div>
+    <div id="tab-admin" class="tab-pane hidden"></div>
+  </main>
+
+  <nav class="bottom-nav">
+    <button class="nav-btn active" data-tab="fixture">
+      <span class="nav-icon">⚽</span>
+      <span>Fixture</span>
+    </button>
+    <button class="nav-btn" data-tab="prode">
+      <span class="nav-icon">📋</span>
+      <span>Mi Prode</span>
+    </button>
+    <button class="nav-btn" data-tab="ranking">
+      <span class="nav-icon">🏆</span>
+      <span>Ranking</span>
+    </button>
+    <button id="admin-tab-btn" class="nav-btn hidden" data-tab="admin">
+      <span class="nav-icon">⚙️</span>
+      <span>Admin</span>
+    </button>
+  </nav>
+</div>
+
+<!-- Modal -->
+<div id="modal-overlay" class="modal-overlay hidden">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Modal</h3>
+      <button id="modal-close" class="btn-icon" style="color:#666;font-size:20px;">✕</button>
+    </div>
+    <div id="modal-body" class="modal-body"></div>
+    <div id="modal-footer" class="modal-footer hidden"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyAQBxVYXv5r6gJGcEb_kBxKzLqU7nKPPMc",
+  authDomain: "prode-atlas-cines-2026.firebaseapp.com",
+  projectId: "prode-atlas-cines-2026",
+  storageBucket: "prode-atlas-cines-2026.firebasestorage.app",
+  messagingSenderId: "843460139586",
+  appId: "1:843460139586:web:6720fd27135e988a11ebdb"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// ── State ──────────────────────────────────────────────────────────────────
+let state = {
+  user: null,
+  profile: null,
+  activeTab: 'fixture',
+  modalAction: null,
+  modalMatchId: null
+};
+
+// ── Auth state ─────────────────────────────────────────────────────────────
+auth.onAuthStateChanged(async (user) => {
+  if (user) {
+    state.user = user;
+    await ensureUserDoc(user);
+    state.profile = await getUserDoc(user.uid);
+    showApp();
+    loadTab('fixture');
+  } else {
+    state.user = null;
+    state.profile = null;
+    showAuth('login');
+  }
+});
+
+// ── Firestore helpers ──────────────────────────────────────────────────────
+async function getUserDoc(uid) {
+  const snap = await db.collection('users').doc(uid).get();
+  return snap.exists ? { id: snap.id, ...snap.data() } : null;
+}
+
+async function ensureUserDoc(user) {
+  const ref = db.collection('users').doc(user.uid);
+  const snap = await ref.get();
+  if (!snap.exists) {
+    const isAdmin = user.email === 'sebastian.s@atlascines.com';
+    await ref.set({
+      firstName: user.displayName ? user.displayName.split(' ')[0] : '',
+      lastName: user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '',
+      email: user.email,
+      role: isAdmin ? 'admin' : 'user',
+      totalPoints: 0,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } else if (user.email === 'sebastian.s@atlascines.com') {
+    const data = snap.data();
+    if (data.role !== 'admin') await ref.update({ role: 'admin' });
+  }
+}
+
+// ── Screens ────────────────────────────────────────────────────────────────
+function showApp() {
+  hide('loading-screen');
+  hide('auth-screen');
+  show('app-screen');
+  const name = state.profile ? state.profile.firstName || state.user.email.split('@')[0] : '';
+  setText('header-username', name);
+  if (state.profile?.role === 'admin') show('admin-tab-btn');
+  else hide('admin-tab-btn');
+}
+
+function showAuth(form) {
+  hide('loading-screen');
+  hide('app-screen');
+  show('auth-screen');
+  switchAuthForm(form);
+}
+
+function switchAuthForm(name) {
+  ['login','register','forgot'].forEach(f => {
+    const el = $('form-' + f);
+    if (el) f === name ? el.classList.remove('hidden') : el.classList.add('hidden');
+  });
+  clearAuthErrors();
+}
+
+function clearAuthErrors() {
+  ['login-error','register-error','forgot-error','forgot-success'].forEach(id => {
+    const el = $(id);
+    if (el) { el.classList.add('hidden'); el.textContent = ''; }
+  });
+}
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.nav-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+  ['fixture','prode','ranking','admin'].forEach(t => {
+    const el = $('tab-' + t);
+    if (el) t === tab ? el.classList.remove('hidden') : el.classList.add('hidden');
+  });
+  state.activeTab = tab;
+  loadTab(tab);
+}
+
+async function loadTab(tab) {
+  if (tab === 'fixture') await renderFixture();
+  else if (tab === 'prode') await renderMyProde();
+  else if (tab === 'ranking') await renderRanking();
+  else if (tab === 'admin') await renderAdmin();
+}
+
+// ── Utilities ─────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const show = id => { const el = $(id); if (el) el.classList.remove('hidden'); };
+const hide = id => { const el = $(id); if (el) el.classList.add('hidden'); };
+const setText = (id, txt) => { const el = $(id); if (el) el.textContent = txt; };
+
+function toast(msg, dur = 2500) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), dur);
+}
+
+function setLoading(containerId, loading) {
+  const el = $(containerId);
+  if (!el) return;
+  if (loading) el.innerHTML = '<div class="spinner"></div>';
+}
+
+function isLocked(match) {
+  if (match.locked) return true;
+  if (!match.date) return false;
+  const d = match.date.toDate ? match.date.toDate() : new Date(match.date);
+  return Date.now() >= d.getTime() - 30 * 60 * 1000;
+}
+
+function calcResult(s1, s2) {
+  const a = parseInt(s1), b = parseInt(s2);
+  if (a > b) return '1';
+  if (a < b) return '2';
+  return 'X';
+}
+
+function calcPoints(pred, result1X2, score1, score2) {
+  if (!pred || !result1X2) return 0;
+  if (pred.prediction1X2 !== result1X2) return 0;
+  const exact =
+    pred.predictedScore1 !== null && pred.predictedScore1 !== undefined &&
+    pred.predictedScore2 !== null && pred.predictedScore2 !== undefined &&
+    parseInt(pred.predictedScore1) === parseInt(score1) &&
+    parseInt(pred.predictedScore2) === parseInt(score2);
+  return exact ? 5 : 3;
+}
+
+const FLAG_MAP = {
+  'Argentina':'🇦🇷','Brasil':'🇧🇷','Estados Unidos':'🇺🇸','USA':'🇺🇸','México':'🇲🇽',
+  'Canadá':'🇨🇦','Francia':'🇫🇷','Alemania':'🇩🇪','España':'🇪🇸','Portugal':'🇵🇹',
+  'Inglaterra':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Países Bajos':'🇳🇱','Holanda':'🇳🇱','Bélgica':'🇧🇪',
+  'Italia':'🇮🇹','Japón':'🇯🇵','Corea del Sur':'🇰🇷','Uruguay':'🇺🇾','Chile':'🇨🇱',
+  'Colombia':'🇨🇴','Ecuador':'🇪🇨','Perú':'🇵🇪','Panamá':'🇵🇦','Jamaica':'🇯🇲',
+  'Honduras':'🇭🇳','Venezuela':'🇻🇪','Bolivia':'🇧🇴','Paraguay':'🇵🇾',
+  'Marruecos':'🇲🇦','Senegal':'🇸🇳','Nigeria':'🇳🇬','Camerún':'🇨🇲',
+  'Costa de Marfil':'🇨🇮','Egipto':'🇪🇬','Sudáfrica':'🇿🇦','Mali':'🇲🇱',
+  'Tanzania':'🇹🇿','Congo DR':'🇨🇩','Zambia':'🇿🇲','Ghana':'🇬🇭',
+  'Argelia':'🇩🇿','Túnez':'🇹🇳','Irán':'🇮🇷','Arabia Saudita':'🇸🇦',
+  'Australia':'🇦🇺','Nueva Zelanda':'🇳🇿','Japón':'🇯🇵','Indonesia':'🇮🇩',
+  'Uzbekistán':'🇺🇿','Jordania':'🇯🇴','Qatar':'🇶🇦',
+  'Ucrania':'🇺🇦','Polonia':'🇵🇱','Croacia':'🇭🇷','Serbia':'🇷🇸','Austria':'🇦🇹',
+  'Suiza':'🇨🇭','Dinamarca':'🇩🇰','Turquía':'🇹🇷','Georgia':'🇬🇪','Eslovaquia':'🇸🇰',
+  'Eslovenia':'🇸🇮','Albania':'🇦🇱','República Checa':'🇨🇿','Rumania':'🇷🇴',
+  'Hungría':'🇭🇺','Grecia':'🇬🇷','Suecia':'🇸🇪','Noruega':'🇳🇴','Escocia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿',
+  'Irlanda':'🇮🇪','Israel':'🇮🇱','Islandia':'🇮🇸','China':'🇨🇳',
+};
+const getFlag = t => FLAG_MAP[t] || '🏳️';
+
+function formatDate(ts) {
+  if (!ts) return '';
+  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  return d.toLocaleString('es-AR', {
+    timeZone: 'America/Argentina/Buenos_Aires',
+    weekday: 'short', day: '2-digit', month: '2-digit',
+    hour: '2-digit', minute: '2-digit'
+  });
+}
+
+const PHASE_ORDER = {
+  'Fase de Grupos': 0, 'Ronda de 32': 1, 'Octavos de Final': 2,
+  'Cuartos de Final': 3, 'Semifinales': 4, 'Tercer Puesto': 5, 'Final': 6
+};
+
+// ── Fixture ────────────────────────────────────────────────────────────────
+async function renderFixture() {
+  setLoading('tab-fixture', true);
+  try {
+    const [matchSnaps, predSnaps] = await Promise.all([
+      db.collection('matches').orderBy('date', 'asc').get(),
+      db.collection('predictions').where('uid', '==', state.user.uid).get()
+    ]);
+    const matches = matchSnaps.docs.map(d => ({ id: d.id, ...d.data() }));
+    const preds = {};
+    predSnaps.docs.forEach(d => { preds[d.data().matchId] = { id: d.id, ...d.data() }; });
+
+    if (matches.length === 0) {
+      $('tab-fixture').innerHTML = `<div class="empty-state"><div class="icon">⚽</div><p>Aún no hay partidos cargados.</p></div>`;
+      return;
+    }
+
+    // Group by phase, then by group letter
+    const phases = {};
+    matches.forEach(m => {
+      const phase = m.round || 'Fase de Grupos';
+      if (!phases[phase]) phases[phase] = {};
+      const grp = m.group || 'General';
+      if (!phases[phase][grp]) phases[phase][grp] = [];
+      phases[phase][grp].push(m);
+    });
+
+    const sortedPhases = Object.keys(phases).sort((a, b) =>
+      (PHASE_ORDER[a] ?? 99) - (PHASE_ORDER[b] ?? 99)
+    );
+
+    let html = '';
+    for (const phase of sortedPhases) {
+      html += `<div class="section-header">${phase}</div>`;
+      const groups = phases[phase];
+      const sortedGroups = Object.keys(groups).sort();
+      for (const grp of sortedGroups) {
+        if (phase === 'Fase de Grupos') html += `<div class="group-header">Grupo ${grp}</div>`;
+        groups[grp].forEach(m => {
+          html += renderMatchCard(m, preds[m.id] || null, false);
+        });
+      }
+    }
+    $('tab-fixture').innerHTML = html;
+  } catch (err) {
+    $('tab-fixture').innerHTML = `<div class="empty-state"><p>Error al cargar el fixture.</p></div>`;
+    console.error(err);
+  }
+}
+
+function renderMatchCard(match, pred, isAdminView) {
+  const locked = isLocked(match);
+  const flag1 = getFlag(match.team1);
+  const flag2 = getFlag(match.team2);
+  const dateStr = formatDate(match.date);
+  const hasResult = match.result1X2 != null;
+
+  let scoreDisplay = '';
+  if (hasResult) {
+    scoreDisplay = `<div class="score-result has-result">${match.score1} - ${match.score2}</div>`;
+  } else {
+    scoreDisplay = `<div class="vs-text">VS</div>`;
+  }
+
+  let predSection = '';
+  if (locked || isAdminView) {
+    if (pred) {
+      const pts = pred.points;
+      const ptsCls = pts === 5 ? 'pts-5' : pts === 3 ? 'pts-3' : pts === 0 ? 'pts-0' : 'pts-pending';
+      const ptsLabel = pts != null ? `${pts} pts` : hasResult ? '0 pts' : 'Pendiente';
+      const scoreStr = (pred.predictedScore1 != null && pred.predictedScore2 != null)
+        ? ` (${pred.predictedScore1}-${pred.predictedScore2})` : '';
+      predSection = `
+        <div class="prediction-display">
+          <div>
+            <div class="pred-label">Tu predicción</div>
+            <div class="pred-value">${pred.prediction1X2}${scoreStr}</div>
+          </div>
+          <span class="pts-badge ${ptsCls}">${ptsLabel}</span>
+        </div>`;
+    } else if (!isAdminView) {
+      predSection = `<div class="prediction-display"><span class="pred-no">Sin predicción</span></div>`;
+    }
+  } else {
+    const v1 = pred?.prediction1X2 === '1' ? 'checked' : '';
+    const vX = pred?.prediction1X2 === 'X' ? 'checked' : '';
+    const v2 = pred?.prediction1X2 === '2' ? 'checked' : '';
+    const ps1 = pred?.predictedScore1 ?? '';
+    const ps2 = pred?.predictedScore2 ?? '';
+    predSection = `
+      <div class="prediction-form">
+        <div class="result-opts">
+          <div class="result-opt">
+            <input type="radio" name="r_${match.id}" id="r1_${match.id}" value="1" ${v1}>
+            <label for="r1_${match.id}">1</label>
+          </div>
+          <div class="result-opt">
+            <input type="radio" name="r_${match.id}" id="rX_${match.id}" value="X" ${vX}>
+            <label for="rX_${match.id}">X</label>
+          </div>
+          <div class="result-opt">
+            <input type="radio" name="r_${match.id}" id="r2_${match.id}" value="2" ${v2}>
+            <label for="r2_${match.id}">2</label>
+          </div>
+        </div>
+        <div class="score-row">
+          <label>Marcador exacto (opcional):</label>
+          <input class="score-input" type="number" min="0" max="30"
+            data-match="${match.id}" data-field="s1" value="${ps1}" placeholder="0">
+          <span class="score-sep">-</span>
+          <input class="score-input" type="number" min="0" max="30"
+            data-match="${match.id}" data-field="s2" value="${ps2}" placeholder="0">
+        </div>
+        <button class="btn-save" data-save-pred="${match.id}">Guardar predicción</button>
+      </div>`;
+  }
+
+  return `
+    <div class="match-card" data-match-id="${match.id}">
+      <div class="match-card-header">
+        <span class="match-venue">🏟️ ${match.stadium || ''}${match.city ? ', ' + match.city : ''}</span>
+        <span>${locked ? '<span class="match-lock-badge">🔒 Cerrado</span>' : `<small>${dateStr}</small>`}</span>
+      </div>
+      ${locked ? `<div style="padding:2px 14px 0;font-size:11px;color:var(--text-secondary)">${dateStr}</div>` : ''}
+      <div class="match-teams">
+        <div class="match-team">
+          <span class="team-flag">${flag1}</span>
+          <span class="team-name">${match.team1}</span>
+        </div>
+        <div class="match-score-display">${scoreDisplay}</div>
+        <div class="match-team">
+          <span class="team-flag">${flag2}</span>
+          <span class="team-name">${match.team2}</span>
+        </div>
+      </div>
+      ${predSection}
+    </div>`;
+}
+
+// ── Mi Prode ───────────────────────────────────────────────────────────────
+async function renderMyProde() {
+  setLoading('tab-prode', true);
+  try {
+    const [matchSnaps, predSnaps] = await Promise.all([
+      db.collection('matches').orderBy('date', 'asc').get(),
+      db.collection('predictions').where('uid', '==', state.user.uid).get()
+    ]);
+    const matches = {};
+    matchSnaps.docs.forEach(d => { matches[d.id] = { id: d.id, ...d.data() }; });
+    const preds = predSnaps.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    const profile = await getUserDoc(state.user.uid);
+    const totalPts = profile?.totalPoints || 0;
+    const correct = preds.filter(p => p.points >= 3).length;
+    const exact = preds.filter(p => p.points === 5).length;
+    const submitted = preds.length;
+
+    let html = `
+      <div class="prode-summary">
+        <div>
+          <h3>Puntos totales</h3>
+          <div class="prode-total-pts">${totalPts}</div>
+          <div class="prode-stats">
+            <div class="prode-stat"><div class="n">${submitted}</div><div class="l">Predicciones</div></div>
+            <div class="prode-stat"><div class="n">${correct}</div><div class="l">Correctas</div></div>
+            <div class="prode-stat"><div class="n">${exact}</div><div class="l">Exactas</div></div>
+          </div>
+        </div>
+        <div style="font-size:48px">⚽</div>
+      </div>`;
+
+    if (preds.length === 0) {
+      html += `<div class="empty-state"><div class="icon">📋</div><p>Todavía no hiciste ninguna predicción.</p></div>`;
+    } else {
+      const predMap = {};
+      preds.forEach(p => { predMap[p.matchId] = p; });
+
+      const phaseGroups = {};
+      preds.forEach(p => {
+        const m = matches[p.matchId];
+        if (!m) return;
+        const phase = m.round || 'Fase de Grupos';
+        if (!phaseGroups[phase]) phaseGroups[phase] = [];
+        phaseGroups[phase].push({ match: m, pred: p });
+      });
+
+      const sortedPhases = Object.keys(phaseGroups).sort((a, b) =>
+        (PHASE_ORDER[a] ?? 99) - (PHASE_ORDER[b] ?? 99));
+
+      for (const phase of sortedPhases) {
+        html += `<div class="section-header">${phase}</div>`;
+        phaseGroups[phase].forEach(({ match, pred }) => {
+          html += renderMatchCard(match, pred, false);
+        });
+      }
+    }
+
+    $('tab-prode').innerHTML = html;
+  } catch (err) {
+    $('tab-prode').innerHTML = `<div class="empty-state"><p>Error al cargar tus predicciones.</p></div>`;
+    console.error(err);
+  }
+}
+
+// ── Ranking ────────────────────────────────────────────────────────────────
+async function renderRanking() {
+  setLoading('tab-ranking', true);
+  try {
+    const snap = await db.collection('users').orderBy('totalPoints', 'desc').get();
+    const users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    if (users.length === 0) {
+      $('tab-ranking').innerHTML = `<div class="empty-state"><div class="icon">🏆</div><p>El ranking estará disponible cuando comiencen las predicciones.</p></div>`;
+      return;
+    }
+
+    let html = `<div class="ranking-table">`;
+    users.forEach((u, i) => {
+      const isMe = u.id === state.user.uid;
+      const pos = i + 1;
+      const posCls = pos === 1 ? 'gold' : pos === 2 ? 'silver' : pos === 3 ? 'bronze' : '';
+      const posEmoji = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos;
+      const initial = (u.firstName || u.email || '?')[0].toUpperCase();
+      html += `
+        <div class="ranking-row${isMe ? ' me' : ''}">
+          <div class="rank-pos ${posCls}">${posEmoji}</div>
+          <div class="rank-avatar" style="${isMe ? 'background:var(--cyan)' : ''}">${initial}</div>
+          <div class="rank-name">${u.firstName || ''} ${u.lastName || ''}${isMe ? ' (vos)' : ''}</div>
+          <div>
+            <div class="rank-pts">${u.totalPoints || 0}</div>
+            <div class="rank-pts-label">pts</div>
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+    $('tab-ranking').innerHTML = html;
+  } catch (err) {
+    $('tab-ranking').innerHTML = `<div class="empty-state"><p>Error al cargar el ranking.</p></div>`;
+    console.error(err);
+  }
+}
+
+// ── Admin ──────────────────────────────────────────────────────────────────
+async function renderAdmin() {
+  if (state.profile?.role !== 'admin') {
+    $('tab-admin').innerHTML = `<div class="empty-state"><p>Acceso denegado.</p></div>`;
+    return;
+  }
+  setLoading('tab-admin', true);
+  try {
+    const snap = await db.collection('matches').orderBy('date', 'asc').get();
+    const matches = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+    let html = `
+      <div class="admin-header">
+        <h2>Administrar Partidos</h2>
+        <button class="btn-add" id="btn-add-match">+ Agregar</button>
+      </div>`;
+
+    if (matches.length === 0) {
+      html += `<div class="empty-state"><div class="icon">⚽</div><p>No hay partidos. Agregá el primero o corré el seed script.</p></div>`;
+    } else {
+      matches.forEach(m => {
+        const locked = isLocked(m);
+        const hasResult = m.result1X2 != null;
+        html += `
+          <div class="admin-match-card">
+            <div class="admin-match-top">
+              <span class="admin-match-teams">${getFlag(m.team1)} ${m.team1} vs ${m.team2} ${getFlag(m.team2)}</span>
+              ${locked ? '<span class="match-lock-badge">🔒</span>' : ''}
+            </div>
+            <div class="admin-match-meta">
+              ${m.round || ''}${m.group ? ` · Grupo ${m.group}` : ''} · ${formatDate(m.date)}<br>
+              ${m.stadium || ''}${m.city ? ', ' + m.city : ''}
+            </div>
+            ${hasResult ? `<div class="admin-match-result">✅ ${m.score1} - ${m.score2} (${m.result1X2})</div>` : ''}
+            <div class="admin-actions">
+              <button class="btn-sm btn-edit" data-edit-match="${m.id}">✏️ Editar</button>
+              <button class="btn-sm btn-result" data-result-match="${m.id}">⚽ Resultado</button>
+              ${hasResult ? `<button class="btn-sm btn-recalc" data-recalc-match="${m.id}">🔄 Recalcular</button>` : ''}
+              <button class="btn-sm btn-delete" data-delete-match="${m.id}">🗑️ Borrar</button>
+            </div>
+          </div>`;
+      });
+    }
+
+    $('tab-admin').innerHTML = html;
+  } catch (err) {
+    $('tab-admin').innerHTML = `<div class="empty-state"><p>Error al cargar el panel admin.</p></div>`;
+    console.error(err);
+  }
+}
+
+// ── Modal helpers ──────────────────────────────────────────────────────────
+function openModal(title, body, footerHtml) {
+  $('modal-title').textContent = title;
+  $('modal-body').innerHTML = body;
+  if (footerHtml) {
+    $('modal-footer').innerHTML = footerHtml;
+    $('modal-footer').classList.remove('hidden');
+  } else {
+    $('modal-footer').classList.add('hidden');
+  }
+  $('modal-overlay').classList.remove('hidden');
+}
+
+function closeModal() {
+  $('modal-overlay').classList.add('hidden');
+  state.modalAction = null;
+  state.modalMatchId = null;
+}
+
+// ── Match form ─────────────────────────────────────────────────────────────
+function matchFormHTML(m) {
+  const toLocal = (ts) => {
+    if (!ts) return '';
+    const d = ts.toDate ? ts.toDate() : new Date(ts);
+    const pad = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  };
+  const rounds = ['Fase de Grupos','Ronda de 32','Octavos de Final','Cuartos de Final','Semifinales','Tercer Puesto','Final'];
+  const groups = 'ABCDEFGHIJKL'.split('');
+  return `
+    <div class="modal-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Equipo 1</label>
+          <input id="mf-team1" type="text" value="${m?.team1 || ''}" placeholder="Argentina">
+        </div>
+        <div class="form-group">
+          <label>Equipo 2</label>
+          <input id="mf-team2" type="text" value="${m?.team2 || ''}" placeholder="Brasil">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Fecha y Hora (Argentina)</label>
+        <input id="mf-date" type="datetime-local" value="${toLocal(m?.date)}">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Ronda</label>
+          <select id="mf-round">
+            ${rounds.map(r => `<option value="${r}" ${m?.round===r?'selected':''}>${r}</option>`).join('')}
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Grupo</label>
+          <select id="mf-group">
+            <option value="">-</option>
+            ${groups.map(g => `<option value="${g}" ${m?.group===g?'selected':''}>${g}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Estadio</label>
+          <input id="mf-stadium" type="text" value="${m?.stadium || ''}" placeholder="MetLife Stadium">
+        </div>
+        <div class="form-group">
+          <label>Ciudad</label>
+          <input id="mf-city" type="text" value="${m?.city || ''}" placeholder="Nueva Jersey">
+        </div>
+      </div>
+    </div>`;
+}
+
+async function saveMatchFromModal(matchId) {
+  const team1 = $('mf-team1').value.trim();
+  const team2 = $('mf-team2').value.trim();
+  const dateVal = $('mf-date').value;
+  const round = $('mf-round').value;
+  const group = $('mf-group').value;
+  const stadium = $('mf-stadium').value.trim();
+  const city = $('mf-city').value.trim();
+
+  if (!team1 || !team2 || !dateVal) { toast('Completá equipos y fecha'); return; }
+
+  const dateObj = new Date(dateVal);
+  // treat input as Argentina time (UTC-3)
+  const utcMs = dateObj.getTime() + 3 * 3600 * 1000;
+  const ts = firebase.firestore.Timestamp.fromDate(new Date(utcMs));
+
+  const data = { team1, team2, date: ts, round, group, stadium, city, locked: false };
+
+  try {
+    if (matchId) {
+      await db.collection('matches').doc(matchId).update(data);
+      toast('Partido actualizado');
+    } else {
+      await db.collection('matches').add(data);
+      toast('Partido agregado');
+    }
+    closeModal();
+    await renderAdmin();
+  } catch (err) {
+    toast('Error al guardar: ' + err.message);
+  }
+}
+
+// ── Result modal ───────────────────────────────────────────────────────────
+function resultFormHTML(matchId, match) {
+  return `
+    <div class="modal-form">
+      <p style="margin-bottom:16px;color:var(--text-secondary);font-size:14px">${getFlag(match.team1)} <strong>${match.team1}</strong> vs <strong>${match.team2}</strong> ${getFlag(match.team2)}</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Goles ${match.team1}</label>
+          <input id="rf-score1" type="number" min="0" max="30" value="${match.score1 ?? ''}" placeholder="0">
+        </div>
+        <div class="form-group">
+          <label>Goles ${match.team2}</label>
+          <input id="rf-score2" type="number" min="0" max="30" value="${match.score2 ?? ''}" placeholder="0">
+        </div>
+      </div>
+    </div>`;
+}
+
+async function saveResultFromModal(matchId) {
+  const s1 = $('rf-score1').value;
+  const s2 = $('rf-score2').value;
+  if (s1 === '' || s2 === '') { toast('Ingresá los dos marcadores'); return; }
+  const score1 = parseInt(s1), score2 = parseInt(s2);
+  const result1X2 = calcResult(score1, score2);
+  try {
+    await db.collection('matches').doc(matchId).update({ score1, score2, result1X2, locked: true });
+    toast('Resultado guardado, calculando puntos...');
+    closeModal();
+    await recalculatePoints(matchId, score1, score2, result1X2);
+    toast('Puntos calculados ✅');
+    await renderAdmin();
+  } catch (err) {
+    toast('Error: ' + err.message);
+  }
+}
+
+async function recalculatePoints(matchId, score1, score2, result1X2) {
+  if (score1 == null || result1X2 == null) {
+    const snap = await db.collection('matches').doc(matchId).get();
+    const m = snap.data();
+    score1 = m.score1; score2 = m.score2; result1X2 = m.result1X2;
+  }
+  const predSnap = await db.collection('predictions').where('matchId', '==', matchId).get();
+  if (predSnap.empty) return;
+
+  const batch = db.batch();
+  const affectedUids = new Set();
+
+  predSnap.docs.forEach(doc => {
+    const pred = doc.data();
+    const points = calcPoints(pred, result1X2, score1, score2);
+    batch.update(doc.ref, { points });
+    affectedUids.add(pred.uid);
+  });
+  await batch.commit();
+
+  // Recalculate totalPoints per user
+  for (const uid of affectedUids) {
+    const allPreds = await db.collection('predictions').where('uid', '==', uid).get();
+    const total = allPreds.docs.reduce((sum, d) => sum + (d.data().points || 0), 0);
+    await db.collection('users').doc(uid).update({ totalPoints: total });
+  }
+}
+
+// ── Save prediction ────────────────────────────────────────────────────────
+async function savePrediction(matchId) {
+  const radio = document.querySelector(`input[name="r_${matchId}"]:checked`);
+  if (!radio) { toast('Seleccioná 1, X o 2'); return; }
+  const prediction1X2 = radio.value;
+  const s1el = document.querySelector(`.score-input[data-match="${matchId}"][data-field="s1"]`);
+  const s2el = document.querySelector(`.score-input[data-match="${matchId}"][data-field="s2"]`);
+  const ps1 = s1el && s1el.value !== '' ? parseInt(s1el.value) : null;
+  const ps2 = s2el && s2el.value !== '' ? parseInt(s2el.value) : null;
+
+  const btn = document.querySelector(`[data-save-pred="${matchId}"]`);
+  if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+
+  try {
+    const docId = `${state.user.uid}_${matchId}`;
+    await db.collection('predictions').doc(docId).set({
+      uid: state.user.uid,
+      matchId,
+      prediction1X2,
+      predictedScore1: ps1,
+      predictedScore2: ps2,
+      points: null,
+      submittedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    toast('Predicción guardada ✅');
+  } catch (err) {
+    toast('Error al guardar: ' + err.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Guardar predicción'; }
+  }
+}
+
+// ── Auth handlers ──────────────────────────────────────────────────────────
+async function handleLogin() {
+  const email = $('login-email').value.trim();
+  const pass = $('login-password').value;
+  const errEl = $('login-error');
+  errEl.classList.add('hidden');
+  if (!email || !pass) { showAuthError('login-error', 'Completá todos los campos'); return; }
+  $('btn-login').disabled = true; $('btn-login').textContent = 'Ingresando...';
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
+  } catch (e) {
+    showAuthError('login-error', mapAuthError(e.code));
+    $('btn-login').disabled = false; $('btn-login').textContent = 'Ingresar';
+  }
+}
+
+async function handleRegister() {
+  const first = $('reg-first').value.trim();
+  const last = $('reg-last').value.trim();
+  const email = $('reg-email').value.trim();
+  const pass = $('reg-pass').value;
+  const confirm = $('reg-confirm').value;
+  if (!first || !last || !email || !pass || !confirm) {
+    showAuthError('register-error', 'Completá todos los campos'); return;
+  }
+  if (pass !== confirm) { showAuthError('register-error', 'Las contraseñas no coinciden'); return; }
+  if (pass.length < 6) { showAuthError('register-error', 'La contraseña debe tener al menos 6 caracteres'); return; }
+  $('btn-register').disabled = true; $('btn-register').textContent = 'Creando cuenta...';
+  try {
+    const cred = await auth.createUserWithEmailAndPassword(email, pass);
+    const isAdmin = email === 'sebastian.s@atlascines.com';
+    await db.collection('users').doc(cred.user.uid).set({
+      firstName: first, lastName: last, email,
+      role: isAdmin ? 'admin' : 'user',
+      totalPoints: 0,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  } catch (e) {
+    showAuthError('register-error', mapAuthError(e.code));
+    $('btn-register').disabled = false; $('btn-register').textContent = 'Crear Cuenta';
+  }
+}
+
+async function handleForgot() {
+  const email = $('forgot-email').value.trim();
+  if (!email) { showAuthError('forgot-error', 'Ingresá tu email'); return; }
+  $('btn-forgot').disabled = true; $('btn-forgot').textContent = 'Enviando...';
+  try {
+    await auth.sendPasswordResetEmail(email);
+    $('forgot-error').classList.add('hidden');
+    const sEl = $('forgot-success');
+    sEl.textContent = 'Te enviamos un email para restablecer tu contraseña.';
+    sEl.classList.remove('hidden');
+  } catch (e) {
+    showAuthError('forgot-error', mapAuthError(e.code));
+  } finally {
+    $('btn-forgot').disabled = false; $('btn-forgot').textContent = 'Enviar Link';
+  }
+}
+
+function showAuthError(id, msg) {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+function mapAuthError(code) {
+  const map = {
+    'auth/user-not-found': 'No existe una cuenta con ese email.',
+    'auth/wrong-password': 'Contraseña incorrecta.',
+    'auth/invalid-email': 'El email no es válido.',
+    'auth/email-already-in-use': 'Ya existe una cuenta con ese email.',
+    'auth/weak-password': 'La contraseña es muy débil.',
+    'auth/too-many-requests': 'Demasiados intentos. Intentá más tarde.',
+    'auth/invalid-credential': 'Email o contraseña incorrectos.',
+  };
+  return map[code] || 'Ocurrió un error. Intentá de nuevo.';
+}
+
+// ── Event delegation ───────────────────────────────────────────────────────
+document.addEventListener('click', async (e) => {
+  const t = e.target.closest('[data-tab]');
+  if (t) { switchTab(t.dataset.tab); return; }
+
+  if (e.target.closest('[data-auth]')) {
+    switchAuthForm(e.target.closest('[data-auth]').dataset.auth); return;
+  }
+
+  const btnId = e.target.id || e.target.closest('button')?.id;
+
+  if (btnId === 'btn-login') { await handleLogin(); return; }
+  if (btnId === 'btn-register') { await handleRegister(); return; }
+  if (btnId === 'btn-forgot') { await handleForgot(); return; }
+  if (btnId === 'btn-logout') {
+    await auth.signOut();
+    return;
+  }
+
+  if (btnId === 'modal-close') { closeModal(); return; }
+  if (e.target.id === 'modal-overlay') { closeModal(); return; }
+
+  const savePredBtn = e.target.closest('[data-save-pred]');
+  if (savePredBtn) { await savePrediction(savePredBtn.dataset.savePred); return; }
+
+  if (btnId === 'btn-add-match') {
+    state.modalAction = 'add';
+    state.modalMatchId = null;
+    openModal('Agregar Partido', matchFormHTML(null), `
+      <button class="btn-cancel" id="modal-cancel">Cancelar</button>
+      <button class="btn-confirm" id="modal-confirm-match">Guardar</button>`);
+    return;
+  }
+
+  if (btnId === 'modal-cancel') { closeModal(); return; }
+
+  if (btnId === 'modal-confirm-match') {
+    await saveMatchFromModal(state.modalMatchId);
+    return;
+  }
+
+  if (btnId === 'modal-confirm-result') {
+    await saveResultFromModal(state.modalMatchId);
+    return;
+  }
+
+  const editBtn = e.target.closest('[data-edit-match]');
+  if (editBtn) {
+    const matchId = editBtn.dataset.editMatch;
+    state.modalAction = 'edit';
+    state.modalMatchId = matchId;
+    const snap = await db.collection('matches').doc(matchId).get();
+    openModal('Editar Partido', matchFormHTML(snap.data()), `
+      <button class="btn-cancel" id="modal-cancel">Cancelar</button>
+      <button class="btn-confirm" id="modal-confirm-match">Guardar</button>`);
+    return;
+  }
+
+  const resultBtn = e.target.closest('[data-result-match]');
+  if (resultBtn) {
+    const matchId = resultBtn.dataset.resultMatch;
+    state.modalMatchId = matchId;
+    const snap = await db.collection('matches').doc(matchId).get();
+    openModal('Ingresar Resultado', resultFormHTML(matchId, snap.data()), `
+      <button class="btn-cancel" id="modal-cancel">Cancelar</button>
+      <button class="btn-confirm" id="modal-confirm-result">Confirmar</button>`);
+    return;
+  }
+
+  const recalcBtn = e.target.closest('[data-recalc-match]');
+  if (recalcBtn) {
+    toast('Recalculando puntos...');
+    await recalculatePoints(recalcBtn.dataset.recalcMatch);
+    toast('Puntos recalculados ✅');
+    return;
+  }
+
+  const deleteBtn = e.target.closest('[data-delete-match]');
+  if (deleteBtn && confirm('¿Borrar este partido?')) {
+    await db.collection('matches').doc(deleteBtn.dataset.deleteMatch).delete();
+    toast('Partido borrado');
+    await renderAdmin();
+    return;
+  }
+});
+
+document.addEventListener('change', (e) => {
+  // radio change: auto-highlight handled by CSS :checked
+});
+
+// ── PWA ────────────────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  });
+}
+</script>
+</body>
+</html>
