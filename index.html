@@ -765,23 +765,23 @@ function calcPoints(pred, result1X2, score1, score2) {
 }
 
 const FLAG_MAP = {
-  'Argentina':'🇦🇷','Brasil':'🇧🇷','Estados Unidos':'🇺🇸','USA':'🇺🇸','México':'🇲🇽',
-  'Canadá':'🇨🇦','Francia':'🇫🇷','Alemania':'🇩🇪','España':'🇪🇸','Portugal':'🇵🇹',
-  'Inglaterra':'🏴󠁧󠁢󠁥󠁮󠁧󠁿','Países Bajos':'🇳🇱','Holanda':'🇳🇱','Bélgica':'🇧🇪',
-  'Italia':'🇮🇹','Japón':'🇯🇵','Corea del Sur':'🇰🇷','Uruguay':'🇺🇾','Chile':'🇨🇱',
-  'Colombia':'🇨🇴','Ecuador':'🇪🇨','Perú':'🇵🇪','Panamá':'🇵🇦','Jamaica':'🇯🇲',
-  'Honduras':'🇭🇳','Venezuela':'🇻🇪','Bolivia':'🇧🇴','Paraguay':'🇵🇾',
-  'Marruecos':'🇲🇦','Senegal':'🇸🇳','Nigeria':'🇳🇬','Camerún':'🇨🇲',
-  'Costa de Marfil':'🇨🇮','Egipto':'🇪🇬','Sudáfrica':'🇿🇦','Mali':'🇲🇱',
-  'Tanzania':'🇹🇿','Congo DR':'🇨🇩','Zambia':'🇿🇲','Ghana':'🇬🇭',
-  'Argelia':'🇩🇿','Túnez':'🇹🇳','Irán':'🇮🇷','Arabia Saudita':'🇸🇦',
-  'Australia':'🇦🇺','Nueva Zelanda':'🇳🇿','Japón':'🇯🇵','Indonesia':'🇮🇩',
-  'Uzbekistán':'🇺🇿','Jordania':'🇯🇴','Qatar':'🇶🇦',
-  'Ucrania':'🇺🇦','Polonia':'🇵🇱','Croacia':'🇭🇷','Serbia':'🇷🇸','Austria':'🇦🇹',
-  'Suiza':'🇨🇭','Dinamarca':'🇩🇰','Turquía':'🇹🇷','Georgia':'🇬🇪','Eslovaquia':'🇸🇰',
-  'Eslovenia':'🇸🇮','Albania':'🇦🇱','República Checa':'🇨🇿','Rumania':'🇷🇴',
-  'Hungría':'🇭🇺','Grecia':'🇬🇷','Suecia':'🇸🇪','Noruega':'🇳🇴','Escocia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿',
-  'Irlanda':'🇮🇪','Israel':'🇮🇱','Islandia':'🇮🇸','China':'🇨🇳',
+  // Grupos reales del sorteo del 5/12/2025
+  'Argentina':'🇦🇷','Brasil':'🇧🇷','Estados Unidos':'🇺🇸','México':'🇲🇽','Canadá':'🇨🇦',
+  'Francia':'🇫🇷','Alemania':'🇩🇪','España':'🇪🇸','Portugal':'🇵🇹','Inglaterra':'🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+  'Países Bajos':'🇳🇱','Bélgica':'🇧🇪','Uruguay':'🇺🇾','Colombia':'🇨🇴','Ecuador':'🇪🇨',
+  'Paraguay':'🇵🇾','Corea del Sur':'🇰🇷','Japón':'🇯🇵','Australia':'🇦🇺','Croacia':'🇭🇷',
+  'Suiza':'🇨🇭','Austria':'🇦🇹','Turquía':'🇹🇷','Noruega':'🇳🇴','Suecia':'🇸🇪',
+  'Escocia':'🏴󠁧󠁢󠁳󠁣󠁴󠁿','Marruecos':'🇲🇦','Senegal':'🇸🇳','Ghana':'🇬🇭','Egipto':'🇪🇬',
+  'Sudáfrica':'🇿🇦','Costa de Marfil':'🇨🇮','Congo DR':'🇨🇩','Nigeria':'🇳🇬','Argelia':'🇩🇿',
+  'Irán':'🇮🇷','Arabia Saudita':'🇸🇦','Uzbekistán':'🇺🇿','Jordania':'🇯🇴','Qatar':'🇶🇦',
+  'Irak':'🇮🇶','Nueva Zelanda':'🇳🇿','Panamá':'🇵🇦','Bosnia y Herzegovina':'🇧🇦',
+  'República Checa':'🇨🇿','Túnez':'🇹🇳','Cabo Verde':'🇨🇻','Curaçao':'🇨🇼',
+  'Haití':'🇭🇹',
+  // Aliases y selecciones adicionales
+  'USA':'🇺🇸','Holanda':'🇳🇱','Italia':'🇮🇹','Chile':'🇨🇱','Perú':'🇵🇪',
+  'Jamaica':'🇯🇲','Honduras':'🇭🇳','Venezuela':'🇻🇪','Bolivia':'🇧🇴','Indonesia':'🇮🇩',
+  'Polonia':'🇵🇱','Serbia':'🇷🇸','Ucrania':'🇺🇦','Georgia':'🇬🇪','Eslovaquia':'🇸🇰',
+  'Dinamarca':'🇩🇰','Camerún':'🇨🇲','China':'🇨🇳','Israel':'🇮🇱',
 };
 const getFlag = t => FLAG_MAP[t] || '🏳️';
 
@@ -852,8 +852,8 @@ async function renderFixture() {
 
 function renderMatchCard(match, pred, isAdminView) {
   const locked = isLocked(match);
-  const flag1 = getFlag(match.team1);
-  const flag2 = getFlag(match.team2);
+  const flag1 = match.flag1 || getFlag(match.team1);
+  const flag2 = match.flag2 || getFlag(match.team2);
   const dateStr = formatDate(match.date);
   const hasResult = match.result1X2 != null;
 
