@@ -10,6 +10,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="PRODE 2026">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}());</script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -36,6 +37,27 @@
       --header-h:   60px;
       --nav-h:      68px;
       --safe-b:     env(safe-area-inset-bottom, 0px);
+      --bg-input:   #FAFAFA;
+      --header-bg:  #ffffff;
+      --nav-bg:     rgba(255,255,255,0.92);
+    }
+
+    [data-theme="dark"] {
+      --blue:       #00B4D8;
+      --blue-mid:   #0099BB;
+      --cyan-bg:    rgba(0,180,216,0.15);
+      --bg:         #1A1A1A;
+      --bg-input:   #2A2A2A;
+      --card:       #242424;
+      --border:     #333333;
+      --text:       #F5F5F5;
+      --text-2:     #A0A0A0;
+      --text-3:     #666666;
+      --green-bg:   rgba(52,199,89,0.15);
+      --shadow:     0 1px 3px rgba(0,0,0,0.15), 0 4px 12px rgba(0,0,0,0.25);
+      --shadow-lg:  0 4px 16px rgba(0,0,0,0.3), 0 12px 32px rgba(0,0,0,0.4);
+      --header-bg:  #1E1E1E;
+      --nav-bg:     rgba(26,26,26,0.92);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -49,6 +71,7 @@
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       overflow-x: hidden;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     button { cursor: pointer; border: none; background: none; font-family: inherit; font-size: inherit; }
     input, select { font-family: inherit; font-size: inherit; }
@@ -118,7 +141,7 @@
     }
     .auth-logo p { color: rgba(255,255,255,.6); font-size: 14px; margin-top: 4px; }
     .auth-card {
-      background: #fff; border-radius: 22px;
+      background: var(--card); border-radius: 22px;
       padding: 28px 24px;
       box-shadow: var(--shadow-lg);
     }
@@ -135,10 +158,10 @@
       border: 1.5px solid var(--border); border-radius: var(--radius-sm);
       font-size: 16px; color: var(--text);
       transition: border-color .2s, box-shadow .2s; outline: none;
-      background: #FAFAFA;
+      background: var(--bg-input);
     }
     .form-group input:focus {
-      border-color: var(--cyan); background: #fff;
+      border-color: var(--cyan); background: var(--card);
       box-shadow: 0 0 0 3px rgba(0,180,216,.1);
     }
     .form-group select {
@@ -146,13 +169,13 @@
       border: 1.5px solid var(--border); border-radius: var(--radius-sm);
       font-size: 16px; color: var(--text);
       transition: border-color .2s, box-shadow .2s; outline: none;
-      background: #FAFAFA; appearance: none;
+      background: var(--bg-input); appearance: none;
       background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236E6E73' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
       background-repeat: no-repeat; background-position: right 14px center;
       padding-right: 40px;
     }
     .form-group select:focus {
-      border-color: var(--cyan); background-color: #fff;
+      border-color: var(--cyan); background-color: var(--card);
       box-shadow: 0 0 0 3px rgba(0,180,216,.1);
     }
     .form-hint { font-size: 14px; color: var(--text-2); margin-bottom: 16px; line-height: 1.55; }
@@ -181,7 +204,7 @@
 
     .app-header {
       height: var(--header-h); min-height: var(--header-h);
-      background: #fff;
+      background: var(--header-bg);
       border-bottom: 1px solid var(--border);
       display: flex; align-items: center;
       padding: 0 12px 0 16px;
@@ -216,7 +239,7 @@
     .bottom-nav {
       height: calc(var(--nav-h) + var(--safe-b));
       padding-bottom: var(--safe-b);
-      background: rgba(255,255,255,0.92);
+      background: var(--nav-bg);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border-top: 0.5px solid rgba(0,0,0,0.12);
@@ -341,7 +364,7 @@
       background: var(--bg);
     }
     .score-input:focus {
-      border-color: var(--cyan); background: #fff;
+      border-color: var(--cyan); background: var(--card);
       box-shadow: 0 0 0 3px rgba(0,180,216,.1);
     }
     .score-sep { font-size: 18px; font-weight: 700; color: var(--text-3); }
@@ -356,16 +379,15 @@
     .btn-save:hover { background: var(--blue-mid); }
     .btn-save:active { transform: scale(.98); }
     .btn-save:disabled { opacity: .5; cursor: not-allowed; transform: none; }
-    .btn-save.saved { background: #1A7A3A; box-shadow: 0 2px 8px rgba(52,199,89,.25); }
-
-    .save-feedback {
-      text-align: center; font-size: 13px; font-weight: 500;
-      color: #1A7A3A; margin-top: 8px;
-      max-height: 0; overflow: hidden;
-      transition: max-height .3s ease, opacity .3s ease;
-      opacity: 0;
+    .btn-save.saved-edit {
+      background: transparent;
+      color: var(--green);
+      border: 1.5px solid var(--green);
+      box-shadow: none;
     }
-    .save-feedback.show { max-height: 24px; opacity: 1; }
+
+    .prediction-form[data-mode="saved"] .result-opt label { pointer-events: none; opacity: 0.65; }
+    .prediction-form[data-mode="saved"] .score-input { pointer-events: none; opacity: 0.6; }
 
     /* ── Prediction display (locked) ───────────────────────────────────── */
     .prediction-display {
@@ -526,7 +548,7 @@
       z-index: 500; padding-bottom: var(--safe-b);
     }
     .modal {
-      background: #fff; width: 100%; max-width: 480px;
+      background: var(--card); width: 100%; max-width: 480px;
       border-radius: 22px 22px 0 0; max-height: 92vh;
       display: flex; flex-direction: column;
       animation: slideUp .22s ease;
@@ -553,7 +575,7 @@
       font-size: 15px; color: var(--text); outline: none;
       background: var(--bg); transition: border-color .18s;
     }
-    .modal-form input:focus, .modal-form select:focus { border-color: var(--cyan); background: #fff; }
+    .modal-form input:focus, .modal-form select:focus { border-color: var(--cyan); background: var(--card); }
     .form-row { display: flex; gap: 10px; }
     .form-row .form-group { flex: 1; }
 
@@ -566,7 +588,7 @@
     }
     .rules-header {
       height: var(--header-h); min-height: var(--header-h);
-      background: #fff; border-bottom: 1px solid var(--border);
+      background: var(--header-bg); border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 16px; flex-shrink: 0;
       box-shadow: 0 1px 0 rgba(0,0,0,0.06);
@@ -621,6 +643,40 @@
     }
     @media (min-width: 600px) {
       .rules-body { max-width: 600px; margin: 0 auto; }
+    }
+
+    .btn-rules-text {
+      padding: 6px 10px;
+      border-radius: 8px;
+      font-size: 13px; font-weight: 600;
+      color: var(--text-2);
+      transition: background .18s, color .18s;
+      white-space: nowrap;
+    }
+    .btn-rules-text:hover { background: var(--bg); color: var(--text); }
+
+    [data-theme="dark"] .group-header { background: rgba(0,180,216,0.15); color: var(--blue); }
+    [data-theme="dark"] .pts-badge.pts-5 { background: rgba(52,199,89,0.2); color: #6EE89A; }
+    [data-theme="dark"] .pts-badge.pts-3 { background: rgba(0,180,216,0.2); color: var(--blue); }
+    [data-theme="dark"] .pts-badge.pts-0 { background: rgba(255,59,48,0.2); color: #FF6B6B; }
+    [data-theme="dark"] .match-lock-badge { background: rgba(255,149,0,0.2); color: #FFB347; }
+    [data-theme="dark"] .ranking-row.me { background: rgba(0,180,216,0.1); }
+    [data-theme="dark"] .btn-edit   { background: rgba(0,180,216,0.15); color: var(--blue); }
+    [data-theme="dark"] .btn-result { background: rgba(52,199,89,0.15); color: #6EE89A; }
+    [data-theme="dark"] .btn-recalc { background: rgba(255,149,0,0.15); color: #FFB347; }
+    [data-theme="dark"] .btn-delete { background: rgba(255,59,48,0.15); color: #FF6B6B; }
+    [data-theme="dark"] .admin-match-result { background: rgba(52,199,89,0.15); color: #6EE89A; }
+    [data-theme="dark"] .error-msg { background: rgba(255,59,48,0.15); }
+    [data-theme="dark"] .success-msg { background: rgba(52,199,89,0.15); color: #6EE89A; }
+    [data-theme="dark"] .fixture-banner { background: rgba(0,180,216,0.1); color: #4DCDE8; border-color: rgba(0,180,216,0.2); }
+    [data-theme="dark"] .header-logo img,
+    [data-theme="dark"] .auth-logos img {
+      border-radius: 4px;
+      padding: 2px;
+      background: rgba(255,255,255,0.08);
+    }
+    @media (max-width: 380px) {
+      #header-username { display: none; }
     }
   </style>
 </head>
@@ -736,7 +792,8 @@
     </div>
     <div class="header-right">
       <span id="header-username"></span>
-      <button id="btn-rules" class="btn-icon btn-rules" title="Reglas">?</button>
+      <button id="btn-theme" class="btn-icon" title="Cambiar tema">🌙</button>
+      <button id="btn-rules" class="btn-rules-text">ℹ️ Cómo jugar</button>
       <button id="btn-logout" class="btn-icon" title="Cerrar sesión">⏻</button>
     </div>
   </header>
@@ -899,6 +956,23 @@ const TSDB_MAP = {
 const CHAMPION_LOCK = new Date('2026-06-11T16:00:00Z');
 const isChampionLocked = () => Date.now() >= CHAMPION_LOCK.getTime();
 
+// ── Theme ──────────────────────────────────────────────────────────────────
+function initTheme() {
+  const t = localStorage.getItem('theme') || 'light';
+  document.documentElement.setAttribute('data-theme', t);
+  const btn = $('btn-theme');
+  if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+}
+
+function toggleTheme() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const next = isDark ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  const btn = $('btn-theme');
+  if (btn) btn.textContent = next === 'dark' ? '☀️' : '🌙';
+}
+
 // ── Auth state ─────────────────────────────────────────────────────────────
 auth.onAuthStateChanged(async (user) => {
   if (user) {
@@ -953,6 +1027,7 @@ function showApp() {
   setText('header-username', name);
   if (state.profile?.role === 'admin') show('admin-tab-btn');
   else hide('admin-tab-btn');
+  initTheme();
 }
 
 function showAuth(form) {
@@ -1147,9 +1222,14 @@ function renderMatchCard(match, pred, isAdminView) {
     const v2 = pred?.prediction1X2 === '2' ? 'checked' : '';
     const ps1 = pred?.predictedScore1 ?? '';
     const ps2 = pred?.predictedScore2 ?? '';
+    const hasSaved = !!pred;
+    const savedAttr = hasSaved ? ' data-mode="saved"' : '';
+    const btnClass = hasSaved ? 'btn-save saved-edit' : 'btn-save';
+    const btnText = hasSaved ? '✓ Guardado — Editar' : 'Guardar predicción';
+    const savedDataAttr = hasSaved ? ' data-pred-saved="true"' : '';
     predSection = `
       <div class="match-divider"></div>
-      <div class="prediction-form">
+      <div class="prediction-form"${savedAttr}>
         <div class="result-opts">
           <div class="result-opt">
             <input type="radio" name="r_${match.id}" id="r1_${match.id}" value="1" ${v1}>
@@ -1175,8 +1255,7 @@ function renderMatchCard(match, pred, isAdminView) {
           </div>
           <span style="font-size:12px;color:var(--text-3);margin-left:4px">opcional</span>
         </div>
-        <button class="btn-save" data-save-pred="${match.id}">Guardar predicción</button>
-        <div class="save-feedback" data-feedback="${match.id}">✅ Predicción guardada</div>
+        <button class="${btnClass}" data-save-pred="${match.id}"${savedDataAttr}>${btnText}</button>
       </div>`;
   }
 
@@ -1591,14 +1670,11 @@ async function savePrediction(matchId) {
     });
     if (btn) {
       btn.disabled = false;
-      btn.textContent = '✅ Guardado';
-      btn.classList.add('saved');
-      setTimeout(() => { btn.textContent = 'Guardar predicción'; btn.classList.remove('saved'); }, 3000);
-    }
-    const feedback = document.querySelector(`[data-feedback="${matchId}"]`);
-    if (feedback) {
-      feedback.classList.add('show');
-      setTimeout(() => feedback.classList.remove('show'), 3000);
+      btn.textContent = '✓ Guardado — Editar';
+      btn.className = 'btn-save saved-edit';
+      btn.dataset.predSaved = 'true';
+      const form = btn.closest('.prediction-form');
+      if (form) form.setAttribute('data-mode', 'saved');
     }
   } catch (err) {
     toast('Error al guardar: ' + err.message);
@@ -1825,6 +1901,7 @@ document.addEventListener('click', async (e) => {
   if (btnId === 'btn-forgot')   { await handleForgot(); return; }
   if (btnId === 'btn-logout')   { await auth.signOut(); return; }
 
+  if (btnId === 'btn-theme')       { toggleTheme(); return; }
   if (btnId === 'btn-rules')       { $('rules-screen').classList.remove('hidden'); return; }
   if (btnId === 'btn-rules-close') { $('rules-screen').classList.add('hidden'); return; }
 
@@ -1840,7 +1917,18 @@ document.addEventListener('click', async (e) => {
   if (btnId === 'btn-auto-update')   { await autoUpdateResults(); return; }
 
   const savePredBtn = e.target.closest('[data-save-pred]');
-  if (savePredBtn) { await savePrediction(savePredBtn.dataset.savePred); return; }
+  if (savePredBtn) {
+    if (savePredBtn.dataset.predSaved === 'true') {
+      const form = savePredBtn.closest('.prediction-form');
+      if (form) form.removeAttribute('data-mode');
+      savePredBtn.textContent = 'Guardar predicción';
+      savePredBtn.className = 'btn-save';
+      delete savePredBtn.dataset.predSaved;
+    } else {
+      await savePrediction(savePredBtn.dataset.savePred);
+    }
+    return;
+  }
 
   if (btnId === 'btn-add-match') {
     state.modalAction = 'add'; state.modalMatchId = null;
