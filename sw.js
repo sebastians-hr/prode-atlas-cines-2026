@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prode-atlas-2026-v1';
+const CACHE_NAME = 'prode-atlas-2026-v2';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
@@ -43,7 +43,27 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Cache-first for static assets
+  // Network-first for HTML and manifest (always serve latest version)
+  const isHtmlOrManifest = url.pathname === '/' ||
+    url.pathname.endsWith('.html') ||
+    url.pathname.endsWith('manifest.json');
+
+  if (isHtmlOrManifest) {
+    e.respondWith(
+      fetch(e.request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(e.request, clone));
+          }
+          return response;
+        })
+        .catch(() => caches.match(e.request))
+    );
+    return;
+  }
+
+  // Cache-first for other static assets
   e.respondWith(
     caches.match(e.request).then((cached) => {
       if (cached) return cached;
@@ -54,7 +74,7 @@ self.addEventListener('fetch', (e) => {
         }
         return response;
       }).catch(() => {
-        if (e.request.headers.get('accept').includes('text/html')) {
+        if (e.request.headers.get('accept')?.includes('text/html')) {
           return caches.match('/index.html');
         }
       });

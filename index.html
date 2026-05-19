@@ -10,7 +10,14 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="PRODE 2026">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}());</script>
+  <meta property="og:title" content="PRODE Atlas Cines Mundial 2026">
+  <meta property="og:description" content="Predicciones del Mundial 2026 - Sumate al PRODE de Atlas Cines">
+  <meta property="og:image" content="https://sebastians-hr.github.io/prode-atlas-cines-2026/logo-atlas.png">
+  <meta property="og:url" content="https://sebastians-hr.github.io/prode-atlas-cines-2026/">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://sebastians-hr.github.io/prode-atlas-cines-2026/logo-atlas.png">
+  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);}());</script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -678,6 +685,104 @@
     @media (max-width: 380px) {
       #header-username { display: none; }
     }
+
+    /* ── Alert banner ─────────────────────────────────────────────────────── */
+    .alert-banner {
+      background: #FFF4D6; color: #7A5600;
+      border: 1px solid rgba(240,192,64,.6);
+      border-radius: var(--radius-sm);
+      padding: 11px 14px; font-size: 13px; font-weight: 500;
+      margin-bottom: 12px; line-height: 1.4;
+    }
+    [data-theme="dark"] .alert-banner {
+      background: #3D3000; color: #FFD147;
+      border-color: rgba(255,209,71,.25);
+    }
+
+    /* ── Next match card ──────────────────────────────────────────────────── */
+    .next-match-card {
+      background: linear-gradient(135deg, var(--blue) 0%, var(--blue-mid) 100%);
+      border-radius: var(--radius); padding: 18px;
+      color: #fff; margin-bottom: 16px;
+      box-shadow: 0 4px 20px rgba(0,48,135,.25);
+    }
+    .next-match-label {
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .7px; opacity: .75; margin-bottom: 12px;
+    }
+    .next-match-teams {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-bottom: 6px; flex-wrap: wrap;
+    }
+    .next-flag { font-size: 26px; line-height: 1; }
+    .next-team { font-size: 14px; font-weight: 700; }
+    .next-vs { font-size: 12px; font-weight: 600; opacity: .6; }
+    .next-match-meta { font-size: 12px; opacity: .7; text-align: center; margin-bottom: 10px; }
+    .next-countdown {
+      text-align: center; font-size: 22px; font-weight: 800;
+      letter-spacing: .5px; margin-bottom: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+    .next-match-pred {
+      text-align: center; font-size: 13px; opacity: .9;
+      background: rgba(255,255,255,.15); border-radius: 8px; padding: 9px;
+    }
+    .btn-next-predict {
+      width: 100%; padding: 11px;
+      background: rgba(255,255,255,.2); color: #fff;
+      border: 1.5px solid rgba(255,255,255,.4);
+      border-radius: var(--radius-sm); font-size: 14px; font-weight: 700;
+      transition: background .18s;
+    }
+    .btn-next-predict:hover { background: rgba(255,255,255,.3); }
+
+    /* ── Stats card (Mi Prode) ────────────────────────────────────────────── */
+    .stats-card {
+      background: var(--card); border-radius: var(--radius);
+      box-shadow: var(--shadow); margin-bottom: 18px; overflow: hidden;
+    }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; }
+    .stat-item {
+      padding: 16px 12px 12px; text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-item:nth-child(odd) { border-right: 1px solid var(--border); }
+    .stat-n { font-size: 30px; font-weight: 800; color: var(--blue); line-height: 1; }
+    .stat-of { font-size: 18px; font-weight: 600; color: var(--text-2); }
+    .stat-pct { font-size: 14px; font-weight: 600; color: var(--text-2); }
+    .stat-l {
+      font-size: 11px; color: var(--text-2);
+      text-transform: uppercase; letter-spacing: .4px; margin-top: 5px;
+    }
+    .stats-rank-row {
+      padding: 12px 16px; text-align: center;
+      font-size: 14px; color: var(--text-2);
+    }
+    .stats-rank-row strong { color: var(--text); font-size: 16px; }
+
+    /* ── Onboarding modal ─────────────────────────────────────────────────── */
+    .modal-overlay.centered { align-items: center; padding: 20px; }
+    .modal-overlay.centered .modal { border-radius: 22px; }
+    .onboarding-section {
+      padding-bottom: 16px; margin-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .onboarding-section:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
+    .onboarding-section h4 {
+      font-size: 15px; font-weight: 700; color: var(--blue);
+      margin-bottom: 10px;
+    }
+    .onboarding-section p { font-size: 14px; color: var(--text); line-height: 1.6; }
+    .onboarding-pts { display: flex; flex-direction: column; gap: 10px; }
+    .onboarding-pt-row {
+      display: flex; align-items: center; gap: 12px;
+      font-size: 14px; color: var(--text);
+    }
+    .onboarding-pt-badge {
+      min-width: 44px; height: 36px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; font-weight: 800; flex-shrink: 0;
+    }
   </style>
 </head>
 <body>
@@ -918,8 +1023,10 @@ const db = firebase.firestore();
 let state = {
   user: null, profile: null, activeTab: 'fixture',
   modalAction: null, modalMatchId: null,
-  championData: undefined  // undefined = not yet loaded, null = loaded & not set
+  championData: undefined,
+  scrollToMatch: null
 };
+let countdownInterval = null;
 
 // ── Teams & Constants ──────────────────────────────────────────────────────
 const TEAMS_WC2026 = [
@@ -958,7 +1065,7 @@ const isChampionLocked = () => Date.now() >= CHAMPION_LOCK.getTime();
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 function initTheme() {
-  const t = localStorage.getItem('theme') || 'light';
+  const t = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', t);
   const btn = $('btn-theme');
   if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
@@ -1002,7 +1109,8 @@ async function ensureUserDoc(user) {
       firstName: user.displayName ? user.displayName.split(' ')[0] : '',
       lastName: user.displayName ? user.displayName.split(' ').slice(1).join(' ') : '',
       email: user.email, role: isAdmin ? 'admin' : 'user',
-      totalPoints: 0, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      totalPoints: 0, onboardingSeen: false,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
     });
   } else if (user.email === 'sebastian.s@atlascines.com') {
     const data = snap.data();
@@ -1028,6 +1136,7 @@ function showApp() {
   if (state.profile?.role === 'admin') show('admin-tab-btn');
   else hide('admin-tab-btn');
   initTheme();
+  checkOnboarding();
 }
 
 function showAuth(form) {
@@ -1135,6 +1244,7 @@ const PHASE_ORDER = {
 // ── Fixture ────────────────────────────────────────────────────────────────
 async function renderFixture() {
   setLoading('tab-fixture');
+  if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
   try {
     const [matchSnaps, predSnaps] = await Promise.all([
       db.collection('matches').orderBy('date', 'asc').get(),
@@ -1160,7 +1270,9 @@ async function renderFixture() {
 
     const sortedPhases = Object.keys(phases).sort((a, b) => (PHASE_ORDER[a] ?? 99) - (PHASE_ORDER[b] ?? 99));
 
-    let html = `
+    let html = renderUrgentBanner(matches, preds);
+    html += renderNextMatchCard(matches, preds);
+    html += `
       <div class="fixture-banner">
         ℹ️ Las predicciones se pueden editar hasta <strong>5 minutos</strong> antes del comienzo de cada partido.
       </div>`;
@@ -1176,6 +1288,15 @@ async function renderFixture() {
     }
     html += '<div style="height:16px"></div>';
     $('tab-fixture').innerHTML = html;
+    startCountdown();
+    if (state.scrollToMatch) {
+      const target = state.scrollToMatch;
+      state.scrollToMatch = null;
+      setTimeout(() => {
+        const card = document.querySelector(`[data-match-id="${target}"]`);
+        if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 150);
+    }
   } catch (err) {
     $('tab-fixture').innerHTML = `<div class="empty-state"><p>Error al cargar el fixture.</p></div>`;
     console.error(err);
@@ -1185,8 +1306,10 @@ async function renderFixture() {
 // ── Match Card ─────────────────────────────────────────────────────────────
 function renderMatchCard(match, pred, isAdminView) {
   const locked = isLocked(match);
-  const flag1 = match.flag1 || getFlag(match.team1);
-  const flag2 = match.flag2 || getFlag(match.team2);
+  const t1 = TSDB_MAP[match.team1] || match.team1;
+  const t2 = TSDB_MAP[match.team2] || match.team2;
+  const flag1 = match.flag1 || getFlag(t1);
+  const flag2 = match.flag2 || getFlag(t2);
   const dateStr = formatDate(match.date);
   const hasResult = match.result1X2 != null;
 
@@ -1271,12 +1394,12 @@ function renderMatchCard(match, pred, isAdminView) {
       <div class="match-teams">
         <div class="match-team">
           <span class="team-flag">${flag1}</span>
-          <span class="team-name">${match.team1}</span>
+          <span class="team-name">${t1}</span>
         </div>
         <div class="match-score-display">${scoreDisplay}</div>
         <div class="match-team">
           <span class="team-flag">${flag2}</span>
-          <span class="team-name">${match.team2}</span>
+          <span class="team-name">${t2}</span>
         </div>
       </div>
       ${predSection}
@@ -1340,10 +1463,11 @@ async function renderMyProde() {
   setLoading('tab-prode');
   try {
     await loadChampionData();
-    const [matchSnaps, predSnaps, profile] = await Promise.all([
+    const [matchSnaps, predSnaps, profile, usersSnap] = await Promise.all([
       db.collection('matches').orderBy('date', 'asc').get(),
       db.collection('predictions').where('uid', '==', state.user.uid).get(),
-      getUserDoc(state.user.uid)
+      getUserDoc(state.user.uid),
+      db.collection('users').orderBy('totalPoints', 'desc').get()
     ]);
     state.profile = profile;
 
@@ -1352,23 +1476,38 @@ async function renderMyProde() {
     const preds = predSnaps.docs.map(d => ({ id: d.id, ...d.data() }));
 
     const totalPts = profile?.totalPoints || 0;
+    const played = preds.length;
     const correct = preds.filter(p => p.points >= 3).length;
     const exact = preds.filter(p => p.points === 5).length;
+    const totalMatches = matchSnaps.docs.length;
+    const allUsers = usersSnap.docs;
+    const rankIdx = allUsers.findIndex(u => u.id === state.user.uid);
+    const rankPos = rankIdx >= 0 ? rankIdx + 1 : null;
+    const pct = played > 0 ? Math.round(correct / played * 100) : 0;
 
     let html = renderChampionCard(profile);
 
     html += `
-      <div class="prode-summary">
-        <div>
-          <h3>Puntos totales</h3>
-          <div class="prode-total-pts">${totalPts}</div>
-          <div class="prode-stats">
-            <div class="prode-stat"><div class="n">${preds.length}</div><div class="l">Jugados</div></div>
-            <div class="prode-stat"><div class="n">${correct}</div><div class="l">Correctos</div></div>
-            <div class="prode-stat"><div class="n">${exact}</div><div class="l">Exactos</div></div>
+      <div class="stats-card">
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-n">${totalPts}</div>
+            <div class="stat-l">Puntos totales</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-n">${played}<span class="stat-of">/${totalMatches}</span></div>
+            <div class="stat-l">Predicciones</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-n">${correct}<span class="stat-pct"> ${pct}%</span></div>
+            <div class="stat-l">Aciertos</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-n">${exact}</div>
+            <div class="stat-l">Exactos</div>
           </div>
         </div>
-        <div style="font-size:52px;opacity:.9">⚽</div>
+        ${rankPos ? `<div class="stats-rank-row">Estás <strong>${rankPos}°</strong> de ${allUsers.length} en el ranking</div>` : ''}
       </div>`;
 
     if (preds.length === 0) {
@@ -1541,7 +1680,9 @@ function openModal(title, body, footerHtml) {
   $('modal-overlay').classList.remove('hidden');
 }
 function closeModal() {
+  if (state.modalAction === 'onboarding') markOnboardingSeen();
   $('modal-overlay').classList.add('hidden');
+  $('modal-overlay').classList.remove('centered');
   state.modalAction = null; state.modalMatchId = null;
 }
 
@@ -1886,6 +2027,147 @@ function mapAuthError(code) {
   return m[code] || 'Ocurrió un error. Intentá de nuevo.';
 }
 
+// ── Urgent banner ─────────────────────────────────────────────────────────
+function renderUrgentBanner(matches, preds) {
+  const now = Date.now();
+  const twoH = 2 * 3600 * 1000;
+  const urgent = matches.filter(m => {
+    if (isLocked(m)) return false;
+    if (preds[m.id]) return false;
+    const d = m.date?.toDate ? m.date.toDate() : (m.date ? new Date(m.date) : null);
+    if (!d) return false;
+    const diff = d.getTime() - now;
+    return diff > 0 && diff <= twoH;
+  });
+  if (!urgent.length) return '';
+  const n = urgent.length;
+  return `<div class="alert-banner">⚠️ Tenés <strong>${n}</strong> partido${n > 1 ? 's' : ''} sin predicción que empieza${n > 1 ? 'n' : ''} pronto</div>`;
+}
+
+// ── Next match card ────────────────────────────────────────────────────────
+function renderNextMatchCard(matches, preds) {
+  const now = Date.now();
+  const upcoming = matches
+    .filter(m => {
+      const d = m.date?.toDate ? m.date.toDate() : (m.date ? new Date(m.date) : null);
+      return d && d.getTime() > now && !isLocked(m);
+    })
+    .sort((a, b) => {
+      const da = a.date?.toDate ? a.date.toDate().getTime() : new Date(a.date).getTime();
+      const db_ = b.date?.toDate ? b.date.toDate().getTime() : new Date(b.date).getTime();
+      return da - db_;
+    });
+  if (!upcoming.length) return '';
+
+  const next = upcoming[0];
+  const t1 = TSDB_MAP[next.team1] || next.team1;
+  const t2 = TSDB_MAP[next.team2] || next.team2;
+  const flag1 = next.flag1 || getFlag(t1);
+  const flag2 = next.flag2 || getFlag(t2);
+  const targetMs = next.date?.toDate ? next.date.toDate().getTime() : new Date(next.date).getTime();
+  const pred = preds[next.id];
+
+  const predHtml = pred
+    ? `<div class="next-match-pred">Tu predicción: <strong>${pred.prediction1X2}</strong>${pred.predictedScore1 != null ? ` · ${pred.predictedScore1}–${pred.predictedScore2}` : ''}</div>`
+    : `<button class="btn-next-predict" data-scroll-to="${next.id}">⚡ Predecir ahora</button>`;
+
+  return `
+    <div class="next-match-card">
+      <div class="next-match-label">⏱ Próximo partido</div>
+      <div class="next-match-teams">
+        <span class="next-flag">${flag1}</span>
+        <span class="next-team">${t1}</span>
+        <span class="next-vs">vs</span>
+        <span class="next-team">${t2}</span>
+        <span class="next-flag">${flag2}</span>
+      </div>
+      <div class="next-match-meta">${formatDate(next.date)}${next.stadium ? ' · 🏟 ' + next.stadium : ''}${next.city ? ', ' + next.city : ''}</div>
+      <div class="next-countdown" id="next-countdown" data-target="${targetMs}"></div>
+      ${predHtml}
+    </div>`;
+}
+
+function startCountdown() {
+  if (countdownInterval) { clearInterval(countdownInterval); countdownInterval = null; }
+  const el = document.getElementById('next-countdown');
+  if (!el) return;
+  const target = parseInt(el.dataset.target);
+  const pad = n => String(n).padStart(2, '0');
+  const update = () => {
+    const diff = target - Date.now();
+    if (diff <= 0) {
+      el.textContent = '¡El partido está comenzando!';
+      clearInterval(countdownInterval); countdownInterval = null;
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    el.textContent = d > 0
+      ? `Faltan ${d}d ${pad(h)}:${pad(m)}:${pad(s)}`
+      : `Faltan ${pad(h)}:${pad(m)}:${pad(s)}`;
+  };
+  update();
+  countdownInterval = setInterval(update, 1000);
+}
+
+// ── Onboarding ─────────────────────────────────────────────────────────────
+function checkOnboarding() {
+  if (!state.profile || state.profile.onboardingSeen !== false) return;
+  showOnboarding();
+}
+
+function showOnboarding() {
+  openModal('¡Bienvenido al PRODE Atlas Cines! ⚽', onboardingHTML(), `
+    <button class="btn-confirm" id="modal-onboarding-ok" style="width:100%;font-size:16px;padding:15px">Entendido ✅</button>`);
+  state.modalAction = 'onboarding';
+  $('modal-overlay').classList.add('centered');
+}
+
+function onboardingHTML() {
+  return `
+    <div>
+      <div class="onboarding-section">
+        <h4>⚽ Predecí cada partido</h4>
+        <p>Elegí <strong>1</strong> (gana local), <strong>X</strong> (empate) o <strong>2</strong> (gana visitante). Opcional: agregá el marcador exacto para sumar puntos extra.</p>
+      </div>
+      <div class="onboarding-section">
+        <h4>🎯 Puntaje</h4>
+        <div class="onboarding-pts">
+          <div class="onboarding-pt-row">
+            <div class="onboarding-pt-badge" style="background:var(--blue);color:#fff">3</div>
+            <span>Acertás el resultado (1, X o 2)</span>
+          </div>
+          <div class="onboarding-pt-row">
+            <div class="onboarding-pt-badge" style="background:#1A7A3A;color:#fff">+2</div>
+            <span>Bonus por marcador exacto (total 5 pts)</span>
+          </div>
+          <div class="onboarding-pt-row">
+            <div class="onboarding-pt-badge" style="background:#B8860B;color:#fff">+20</div>
+            <span>Si acertás al <strong>campeón del Mundial</strong></span>
+          </div>
+        </div>
+      </div>
+      <div class="onboarding-section">
+        <h4>⏰ Importante</h4>
+        <p>Podés editar tus predicciones hasta <strong>5 minutos antes</strong> de cada partido. La predicción del campeón cierra el <strong>11 de junio a las 13:00 hs</strong>.</p>
+      </div>
+      <div class="onboarding-section">
+        <h4>🏆 Ganador</h4>
+        <p>Quien más puntos sume al final del Mundial se lleva una <strong>sorpresa de Atlas Cines</strong>.</p>
+      </div>
+    </div>`;
+}
+
+async function markOnboardingSeen() {
+  if (!state.user) return;
+  try {
+    await db.collection('users').doc(state.user.uid).update({ onboardingSeen: true });
+    if (state.profile) state.profile.onboardingSeen = true;
+  } catch(e) {}
+}
+
 // ── Event delegation ───────────────────────────────────────────────────────
 document.addEventListener('click', async (e) => {
   const tabBtn = e.target.closest('[data-tab]');
@@ -1908,6 +2190,20 @@ document.addEventListener('click', async (e) => {
   if (btnId === 'modal-close')          { closeModal(); return; }
   if (e.target.id === 'modal-overlay')  { closeModal(); return; }
   if (btnId === 'modal-cancel')         { closeModal(); return; }
+  if (btnId === 'modal-onboarding-ok')  { closeModal(); return; }
+
+  const scrollBtn = e.target.closest('[data-scroll-to]');
+  if (scrollBtn) {
+    const matchId = scrollBtn.dataset.scrollTo;
+    if (state.activeTab !== 'fixture') {
+      state.scrollToMatch = matchId;
+      switchTab('fixture');
+    } else {
+      const card = document.querySelector(`[data-match-id="${matchId}"]`);
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+    return;
+  }
   if (btnId === 'modal-confirm-match')  { await saveMatchFromModal(state.modalMatchId); return; }
   if (btnId === 'modal-confirm-result') { await saveResultFromModal(state.modalMatchId); return; }
 
@@ -1980,7 +2276,14 @@ document.addEventListener('change', () => {});
 
 // ── PWA ────────────────────────────────────────────────────────────────────
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  window.addEventListener('load', () => {
+    let hadController = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (hadController) { window.location.reload(); }
+      hadController = true;
+    });
+  });
 }
 </script>
 </body>
