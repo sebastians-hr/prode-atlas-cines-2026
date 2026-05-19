@@ -17,7 +17,7 @@
   <meta property="og:type" content="website">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:image" content="https://sebastians-hr.github.io/prode-atlas-cines-2026/logo-atlas.png">
-  <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);}());</script>
+  <script>(function(){var t=localStorage.getItem('theme');if(t==='dark')document.documentElement.setAttribute('data-theme','dark');}());</script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -239,18 +239,21 @@
     .btn-icon.btn-rules { font-size: 14px; font-weight: 700; }
 
     /* ── Tab content ───────────────────────────────────────────────────── */
-    .tab-content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .tab-content {
+      flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+      padding-bottom: calc(var(--nav-h) + var(--safe-b));
+    }
     .tab-pane { padding: 16px 16px 0; }
 
     /* ── Bottom nav (iOS tab bar) ──────────────────────────────────────── */
     .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
       height: calc(var(--nav-h) + var(--safe-b));
       padding-bottom: var(--safe-b);
-      background: var(--nav-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-top: 0.5px solid rgba(0,0,0,0.12);
-      display: flex; flex-shrink: 0; z-index: 200;
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+      display: flex; z-index: 300;
     }
     .nav-btn {
       flex: 1; display: flex; flex-direction: column;
@@ -1065,7 +1068,7 @@ const isChampionLocked = () => Date.now() >= CHAMPION_LOCK.getTime();
 
 // ── Theme ──────────────────────────────────────────────────────────────────
 function initTheme() {
-  const t = localStorage.getItem('theme') || 'dark';
+  const t = localStorage.getItem('theme') || 'light';
   document.documentElement.setAttribute('data-theme', t);
   const btn = $('btn-theme');
   if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
